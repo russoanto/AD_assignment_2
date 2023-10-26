@@ -1,0 +1,4 @@
+/home/arusso/Documents/AD/inf_assignment_2/build/CMakeFiles/rebuild_cache.dir
+/home/arusso/Documents/AD/inf_assignment_2/build/CMakeFiles/edit_cache.dir
+/home/arusso/Documents/AD/inf_assignment_2/build/CMakeFiles/main.dir
+/home/arusso/Documents/AD/inf_assignment_2/build/CMakeFiles/tracker.dir
