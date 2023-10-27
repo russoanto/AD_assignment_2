@@ -28,12 +28,11 @@ void Tracklet::predict()
 void Tracklet::update(double x, double y, bool lidarStatus)
 {
   Eigen::VectorXd raw_measurements_ = Eigen::VectorXd(2);
-
   // measurement update
-  if (lidarStatus)
-  {
+  if (lidarStatus){
     raw_measurements_ << x, y;
     kf_.update(raw_measurements_);
     loss_count_ = 0;
   }
+
 }

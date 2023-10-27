@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 #include "KalmanFilter.h"
 
@@ -24,14 +25,15 @@ public:
   int getId() { return id_; }
 
 private:
-  // filter
-  KalmanFilter kf_;
-
   // tracklet id
   int id_;
 
   // number of loss since last update
   int loss_count_;
+
+  // filter
+  KalmanFilter kf_;
+  
 };
 
 #endif // TRACKLET_H_

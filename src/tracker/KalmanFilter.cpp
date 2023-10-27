@@ -17,10 +17,10 @@ void KalmanFilter::init(double dt)
 
   // TODO: Initialize the state covariance matrix P
   P_ = Eigen::MatrixXd(4, 4);
-  P_ << 1000., 0., 0., 0.,
-      0., 1000., 0., 0.,
-      0., 0., 1000., 0.,
-      0., 0., 0., 1000.;
+  P_ << 1., 0., 0., 0.,
+      0., 1., 0., 0.,
+      0., 0., 99999., 0.,
+      0., 0., 0., 99999.;
 
   // measurement covariance
   R_ = Eigen::MatrixXd(2, 2);
@@ -38,6 +38,9 @@ void KalmanFilter::init(double dt)
       0., 1., 0., dt_,
       0., 0., 1., 0.,
       0., 0., 0., 1.;
+
+  u_ = Eigen::VectorXd(4);
+  u_ << 0., 0., 0., 0.;
 
   // set the acceleration noise components
   double noise_ax_ = 2.;
@@ -59,9 +62,9 @@ void KalmanFilter::predict()
 {
   // TODO
   // Implement Kalman Filter Predict
-  x_ = F_*x_;
+  x_ = (F_ * x_) + u_;
   P_ = F_*P_*F_.transpose();
-  //X_ = F_ * 
+
 }
 
 void KalmanFilter::update(const Eigen::VectorXd &z)
@@ -69,8 +72,8 @@ void KalmanFilter::update(const Eigen::VectorXd &z)
   // TODO
   // Implement Kalman Filter Update
 
-  Eigen::VectorXd y = z - H_ * x_;
-  Eigen::MatrixXd S = H_*P_*H_.transpose();
+  Eigen::VectorXd y = z - (H_ * x_);
+  Eigen::MatrixXd S = H_*P_*H_.transpose() + R_;
   Eigen::MatrixXd K = P_*H_.transpose()*S.inverse();
 
   // new estimate

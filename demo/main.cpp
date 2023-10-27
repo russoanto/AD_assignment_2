@@ -1,4 +1,5 @@
 #include <fstream>
+#include <chrono>
 
 #include "viewer/Renderer.h"
 #include "tracker/Tracker.h"
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
     CloudManager lidar_cloud(log_path, freq, renderer);
     std::thread t(&CloudManager::startCloudManager, &lidar_cloud);
 
+
     while (true)
     {
         // Clear the render
@@ -51,8 +53,11 @@ int main(int argc, char *argv[])
         for (size_t i = 0; i < boxes.size(); ++i)
             renderer.renderBox(boxes[i], i);
 
+
+    
         // Call the tracker on the detected clusters
         tracker.track(centroids_x, centroids_y, renderer.getLidarStatus());
+
 
         // retrieve tracklets and render the trackers
         auto tracks = tracker.getTracks();
