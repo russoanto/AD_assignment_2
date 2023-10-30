@@ -19,8 +19,8 @@ void KalmanFilter::init(double dt)
   P_ = Eigen::MatrixXd(4, 4);
   P_ << 1., 0., 0., 0.,
       0., 1., 0., 0.,
-      0., 0., 99999., 0.,
-      0., 0., 0., 99999.;
+      0., 0., 99999.0, 0.,
+      0., 0., 0., 99999.0;
 
   // measurement covariance
   R_ = Eigen::MatrixXd(2, 2);
@@ -63,7 +63,7 @@ void KalmanFilter::predict()
   // TODO
   // Implement Kalman Filter Predict
   x_ = (F_ * x_) + u_;
-  P_ = F_*P_*F_.transpose();
+  P_ = F_*P_*F_.transpose() ;
 
 }
 
