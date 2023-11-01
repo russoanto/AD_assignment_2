@@ -15,14 +15,18 @@ public:
 
   void predict();
   void update(double x, double y, bool lidarStatus);
+  void updateMeters(double x, double y);
 
   // getters
   double getX() { return kf_.getX(); }
   double getY() { return kf_.getY(); }
   double getXCovariance() { return kf_.getXCovariance(); }
   double getYCovariance() { return kf_.getYCovariance(); }
+  double getMeters() { return meters_covered; }
+
   int getLossCount() { return loss_count_; }
   int getId() { return id_; }
+
 
 private:
   // tracklet id
@@ -30,6 +34,9 @@ private:
 
   // number of loss since last update
   int loss_count_;
+
+  // number of meters covered by the traklet
+  double meters_covered;
 
   // filter
   KalmanFilter kf_;

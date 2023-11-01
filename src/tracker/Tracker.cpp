@@ -2,12 +2,14 @@
 #include <iostream>
 #include <map>
 
+#define DISTANCE_TYPE 0  // 0 euclidea; 1 mhalanobis
+
 
 Tracker::Tracker()
 {
     cur_id_ = 0;
     distance_threshold_ = 1.0; // meters
-    covariance_threshold = 0.025; 
+    covariance_threshold = 0.15;
     loss_threshold = 10; //number of frames the track has not been seen
 }
 Tracker::~Tracker()
@@ -25,10 +27,11 @@ void Tracker::removeTracks()
     {
         // TODO
         // Implement logic to discard old tracklets
-        //std::cout << tracks_[i].getXCovariance() << "," << tracks_[i].getYCovariance() << std::endl;
-        if(tracks_[i].getLossCount() < this->loss_threshold && (tracks_[i].getXCovariance() < covariance_threshold || tracks_[i].getYCovariance() < covariance_threshold)){  //lo devo tenere
+        if(tracks_[i].getLossCount() < this->loss_threshold && (tracks_[i].getXCovariance() < covariance_threshold && tracks_[i].getYCovariance() < covariance_threshold)){  //lo devo tenere
             tracks_to_keep.push_back(tracks_[i]);
-        }
+        }else {
+            std::cout << "Removing trak" << tracks_[i].getId() << " tot meters: " << tracks_[i].getMeters() << " with covariance " << tracks_[i].getXCovariance() << "," << tracks_[i].getYCovariance() << std::endl;
+        }   
     }
     tracks_.swap(tracks_to_keep);
 }
@@ -44,6 +47,7 @@ void Tracker::addTracks(const std::vector<bool> &associated_detections, const st
             tracks_.push_back(Tracklet(cur_id_++, centroids_x[i], centroids_y[i]));
         }
 }
+
 
 /*
     This function associates detections (centroids_x,centroids_y) with the tracks (tracks_)
@@ -72,47 +76,36 @@ void Tracker::dataAssociation(std::vector<bool> &associated_detections, const st
             // Implement logic to find the closest detection (centroids_x,centroids_y) 
             // to the current track (tracks_)
 
-            double dist = sqrt(pow(centroids_x[j] - tracks_[i].getX(), 2) + pow(centroids_y[j] - tracks_[i].getY(), 2));
+            double dist;
 
-            // Eigen::VectorXd detection(2);
-            // detection << centroids_x[j], centroids_y[j];
+            if(DISTANCE_TYPE == 0){
+                dist = sqrt(pow(centroids_x[j] - tracks_[i].getX(), 2) + pow(centroids_y[j] - tracks_[i].getY(), 2));
+            }else{
+                Eigen::VectorXd detection{2};
+                detection << centroids_x[j], centroids_y[j];
 
-            // Eigen::VectorXd trackMean(2);
-            // trackMean << tracks_[i].getX(), tracks_[i].getY();
-            // Eigen::VectorXd diff = detection - trackMean;
+                Eigen::VectorXd trackMean{2};
+                trackMean << tracks_[i].getX(), tracks_[i].getY();
+                Eigen::VectorXd diff = detection - trackMean;
 
-            // Eigen::Matrix2d trackCovariance;
-            // trackCovariance << tracks_[i].getXCovariance(), 0.0, 0.0, tracks_[i].getYCovariance();
+                Eigen::Matrix2d trackCovariance;
+                trackCovariance << tracks_[i].getXCovariance(), 0.0, 0.0, tracks_[i].getYCovariance();
 
-            // double dist = sqrt(diff.transpose() * trackCovariance.inverse() *diff); 
-
-
-            if(dist <= min_dist){
+                dist = sqrt(diff.transpose() * trackCovariance.inverse() *diff); 
+            }
+            
+            if(dist < min_dist){
                 closest_point_id = j;
                 min_dist = dist;
             }
         }
-
-        //pair_cluster_idx[i] = closest_point_id;
 
         // Associate the closest detection to a tracklet
         if (min_dist < distance_threshold_ && !associated_detections[closest_point_id])
         {
             associated_track_det_ids_.push_back(std::make_pair(closest_point_id, i));
             associated_detections[closest_point_id] = true;
-        }else if(min_dist < distance_threshold_ && associated_detections[closest_point_id]){
-            for(int k = 0; k < associated_track_det_ids_.size(); k++){
-                if(associated_track_det_ids_[k].first == closest_point_id){
-                    int idx = associated_track_det_ids_[k].second;
-                    double new_dist = sqrt(pow(centroids_x[idx] - tracks_[i].getX(), 2) + pow(centroids_y[idx] - tracks_[i].getY(), 2));
-                    if(min_dist < new_dist){
-                        std::cout << "Swap" << std::endl;
-                        associated_track_det_ids_[k] = std::make_pair(closest_point_id,i);
-                    }
-                }
-            }
         }
-
     }
 }
 

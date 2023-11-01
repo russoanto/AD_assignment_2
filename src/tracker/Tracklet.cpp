@@ -11,6 +11,8 @@ Tracklet::Tracklet(int idTrack, double x, double y)
 
   // set loss count to 0
   loss_count_ = 0;
+
+  meters_covered = 0.0;
 }
 
 Tracklet::~Tracklet()
@@ -24,6 +26,10 @@ void Tracklet::predict()
   loss_count_++;
 }
 
+void Tracklet::updateMeters(double x, double y){
+  this->meters_covered += sqrt(pow(getX() - x, 2) + pow(getY() - y, 2));
+} 
+
 // Update with a real measurement
 void Tracklet::update(double x, double y, bool lidarStatus)
 {
@@ -33,6 +39,7 @@ void Tracklet::update(double x, double y, bool lidarStatus)
     raw_measurements_ << x, y;
     kf_.update(raw_measurements_);
     loss_count_ = 0;
+    updateMeters(x,y);
   }
 
 }
