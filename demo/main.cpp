@@ -29,7 +29,6 @@ int main(int argc, char *argv[])
     CloudManager lidar_cloud(log_path, freq, renderer);
     std::thread t(&CloudManager::startCloudManager, &lidar_cloud);
 
-
     while (true)
     {
         // Clear the render
@@ -61,15 +60,34 @@ int main(int argc, char *argv[])
 
         // retrieve tracklets and render the trackers
         auto tracks = tracker.getTracks();
+        double max_dist = 0.0;
+        int idx;
+        for(int i = 0; i < tracks.size(); ++i){
+            if(tracks[i].getMeters() > max_dist){
+                max_dist = tracks[i].getMeters();
+                idx = i;
+            }
+        }
+
         for (size_t i = 0; i < tracks.size(); ++i)
         {
+            int r,g,b = 255;
+            if(i == idx){
+                r = 0;
+                b = 0;
+            }
             renderer.addCircle(tracks[i].getX(), tracks[i].getY(), tracks[i].getId());
-            renderer.addText(tracks[i].getX() + 0.01, tracks[i].getY() + 0.01, tracks[i].getId());
+            renderer.addText(tracks[i].getX() + 0.01, tracks[i].getY() + 0.01, tracks[i].getId(),r,g,b,tracks[i].getId());
         }
+
+        /*
+            Stampo il cerchio che identifica la mia area e in alto a destra il numero di traklet che entra in qull'area
+        */
+        renderer.addText(20.0,0.0, tracker.getPersonInside(), 134,255,11, 10000);
+        renderer.addCircle(tracker.getCircleCenter()[0], tracker.getCircleCenter()[1], 100001, tracker.getRadius());
 
         renderer.spinViewerOnce();
     }
-
     t.join();
     return 0;
 }

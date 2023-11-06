@@ -25,10 +25,33 @@ namespace viewer
     viewer_->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 10000.0, "c_" + std::to_string(id));
   }
 
+
+    void Renderer::addCircle(float centroid_x, float centroid_y, int id, float radius)
+  {
+
+    pcl::ModelCoefficients c_coeff;
+    c_coeff.values.resize(3);
+    c_coeff.values[0] = centroid_x;
+    c_coeff.values[1] = centroid_y;
+    c_coeff.values[2] = radius; // radius
+
+    viewer_->addCircle(c_coeff, "c_" + std::to_string(id), 0);
+
+    viewer_->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, 1000, "c_" + std::to_string(id));
+    viewer_->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0, 1, 0, "c_" + std::to_string(id));
+    viewer_->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 10000.0, "c_" + std::to_string(id));
+  }
+
+
+
   void Renderer::addText(float centroid_x, float centroid_y, int id)
   {
 
     viewer_->addText3D(std::to_string(id), pcl::PointXYZ(centroid_x, centroid_y, 0), 0.3, 255, 255, 255, "", 0);
+  }
+
+  void Renderer::addText(float centroid_x, float centroid_y, int text, int r, int g, int b, int id){
+    viewer_->addText3D(std::to_string(text), pcl::PointXYZ(centroid_x, centroid_y, 0), 0.3, r, g, b, std::to_string(id), 0);
   }
 
   void Renderer::removeShape(int id)

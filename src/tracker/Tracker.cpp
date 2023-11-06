@@ -1,8 +1,11 @@
 #include "tracker/Tracker.h"
 #include <iostream>
-#include <map>
+#include <algorithm>
+#include <vector>
+
 
 #define DISTANCE_TYPE 0  // 0 euclidea; 1 mhalanobis
+
 
 
 Tracker::Tracker()
@@ -11,6 +14,9 @@ Tracker::Tracker()
     distance_threshold_ = 1.0; // meters
     covariance_threshold = 0.15;
     loss_threshold = 10; //number of frames the track has not been seen
+    circle_center = Eigen::VectorXd(2);
+    circle_center << 0.0, 0.0;
+    radius = 3.0;
 }
 Tracker::~Tracker()
 {
@@ -29,9 +35,11 @@ void Tracker::removeTracks()
         // Implement logic to discard old tracklets
         if(tracks_[i].getLossCount() < this->loss_threshold && (tracks_[i].getXCovariance() < covariance_threshold && tracks_[i].getYCovariance() < covariance_threshold)){  //lo devo tenere
             tracks_to_keep.push_back(tracks_[i]);
-        }else {
-            std::cout << "Removing trak" << tracks_[i].getId() << " tot meters: " << tracks_[i].getMeters() << " with covariance " << tracks_[i].getXCovariance() << "," << tracks_[i].getYCovariance() << std::endl;
-        }   
+        }else{
+            // if(std::find(tracklet_inside.begin(), tracklet_inside.end(),tracks_[i].getId()) == tracklet_inside.end()){
+            //     tracklet_inside.push_back(tracks_[i].getId());
+            // }
+        }
     }
     tracks_.swap(tracks_to_keep);
 }
@@ -55,12 +63,12 @@ void Tracker::addTracks(const std::vector<bool> &associated_detections, const st
         associated_detection an empty vector to host the associated detection
         centroids_x & centroids_y measurements representing the detected objects
 */
+
 void Tracker::dataAssociation(std::vector<bool> &associated_detections, const std::vector<double> &centroids_x, const std::vector<double> &centroids_y)
 {
 
     //Remind this vector contains a pair of tracks and its corresponding
     associated_track_det_ids_.clear();
-    std::map<int,int> pair_cluster_idx;
 
     int counter = 0;
 
@@ -105,6 +113,19 @@ void Tracker::dataAssociation(std::vector<bool> &associated_detections, const st
         {
             associated_track_det_ids_.push_back(std::make_pair(closest_point_id, i));
             associated_detections[closest_point_id] = true;
+        }
+
+        /*
+            Calcolo la distanza tra il centroide del traklet e quello dell'area, se la distanza è minore o ugualer al raggio
+            del cerchio che identifica l'area allora il traklet è all'interno. Ovviamente verifico anche di non aver già contato
+            quel traklet
+        */
+           
+        float dist = sqrt(pow(tracks_[i].getX() - getCircleCenter()[0], 2) + pow(tracks_[i].getY() - getCircleCenter()[1], 2));
+        if(dist <= getRadius()){
+            if(std::find(tracklet_inside.begin(), tracklet_inside.end(),tracks_[i].getId()) == tracklet_inside.end()){
+                tracklet_inside.push_back(tracks_[i].getId());
+            }
         }
     }
 }

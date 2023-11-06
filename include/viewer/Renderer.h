@@ -38,12 +38,15 @@ namespace viewer
     void removeShape(int id);
 
     void addCircle(float centroid_x, float centroid_y, int id);
+    void addCircle(float centroid_x, float centroid_y, int id, float radius);
 
     void clearRays();
 
     void clearViewer();
 
     void addText(float centroid_x, float centroid_y, int id);
+    void addText(float centroid_x, float centroid_y, int text, int r, int g, int b, int id);
+
 
     void renderPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
                           const std::string &name,

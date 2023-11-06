@@ -10,6 +10,11 @@ public:
   Tracker();
   ~Tracker();
 
+
+  int getPersonInside(){ return this->tracklet_inside.size(); };
+  Eigen::VectorXd getCircleCenter(){ return this->circle_center; };
+  float getRadius(){ return this->radius; };
+
   // handle tracklets
   void removeTracks();
   void addTracks(const std::vector<bool> &associated_detections,
@@ -41,6 +46,17 @@ private:
   double distance_threshold_;
   double covariance_threshold;
   int loss_threshold;
+
+  /*
+    Vado a definire un centro e un raggio in questo modo rappresento l'area in cui entrare con un cerchio
+  */
+
+  Eigen::VectorXd circle_center;
+  float radius;
+  std::vector<int> tracklet_inside; //indico gli id dei tralket che sono entrati nell'area
+
+
+
 };
 
 #endif // TRACKER_H_
